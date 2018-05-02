@@ -1,13 +1,35 @@
 language: php
+sudo: false
 
-php:
-  - 7.1
-  - 7.2
+matrix:
+  include:
+    - php: 7.1
+    - php: 7.2
 
-before_script:
-  - composer install
+    - php: 7.1
+      env:
+        - COMPOSER_OPTIONS="--prefer-lowest"
+    - php: 7.2
+      env:
+        - COMPOSER_OPTIONS="--prefer-lowest"
+
+    - php: 7.2
+      env:
+        - TEST_COVERAGE=true
+  fast_finish: true
+
+install:
+  - if [[ ! $TEST_COVERAGE ]]; then phpenv config-rm xdebug.ini; fi
+  - if [[ $TEST_COVERAGE ]]; then PHPUNIT_FLAGS="--coverage-clover ./build/logs/clover.xml"; fi
+  - composer update --prefer-dist --prefer-stable --no-interaction $COMPOSER_OPTIONS
 
 script:
-  - vendor/bin/phpunit -c phpunit.xml.dist
+  - vendor/bin/phpunit -v $PHPUNIT_FLAGS
+
+script:
+  - vendor/bin/phpunit -c phpunit.xml.dist -v $PHPUNIT_FLAGS
   - vendor/bin/phpstan analyse -l 7 src tests
   - vendor/bin/php-cs-fixer fix --dry-run --diff
+
+after_success:
+  - if [[ $TEST_COVERAGE ]]; then wget https://scrutinizer-ci.com/ocular.phar && php ocular.phar code-coverage:upload --format=php-clover ./build/logs/clover.xml; fi
