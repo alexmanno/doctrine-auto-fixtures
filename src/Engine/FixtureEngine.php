@@ -68,7 +68,7 @@ class FixtureEngine
             $factoryClass = $factoryParts[0];
             $factoryMethod = $factoryParts[1];
 
-            $property->setValue($fixture, \call_user_func([$factoryClass, $factoryMethod]));
+            $property->setValue($fixture, \call_user_func([new $factoryClass, $factoryMethod]));
         }
 
         if ($annotation->class) {
