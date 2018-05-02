@@ -26,4 +26,9 @@ class Fixture implements Annotation
      * @var string
      */
     public $class;
+
+    /**
+     * @var string
+     */
+    public $faker;
 }

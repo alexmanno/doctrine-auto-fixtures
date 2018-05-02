@@ -32,6 +32,13 @@ class Entity
     private $surname;
 
     /**
+     * @var string
+     *
+     * @Fixture(faker="address")
+     */
+    private $address;
+
+    /**
      * @var AnotherEntity
      *
      * @Fixture(class="AlexManno\Tests\Entities\AnotherEntity")
@@ -91,6 +98,25 @@ class Entity
     public function setSurname(string $surname): Entity
     {
         $this->surname = $surname;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAddress(): string
+    {
+        return $this->address;
+    }
+
+    /**
+     * @param string $address
+     * @return Entity
+     */
+    public function setAddress(string $address): Entity
+    {
+        $this->address = $address;
 
         return $this;
     }

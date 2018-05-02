@@ -8,6 +8,8 @@ use AlexManno\Annotations\Fixture;
 use AlexManno\Exceptions\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Faker\Factory;
+use Faker\Generator;
 use ProxyManager\Factory\LazyLoadingValueHolderFactory;
 use ProxyManager\Proxy\VirtualProxyInterface;
 
@@ -15,12 +17,17 @@ class FixtureEngine
 {
     /** @var array */
     private $loadedClass = [];
+    /** @var Generator */
+    private $fakerFactory;
 
     /**
      * FixtureEngine constructor.
+     * @param Generator $fakerFactory
      */
-    public function __construct()
+    public function __construct(Generator $fakerFactory = null)
     {
+        $this->fakerFactory = $fakerFactory ?? Factory::create();
+
         AnnotationRegistry::registerLoader([require __DIR__ . '/../../vendor/autoload.php', 'loadClass']);
     }
 
@@ -72,7 +79,16 @@ class FixtureEngine
             $property->setValue($fixture, $this->get($annotation->class));
         }
 
+        if ($annotation->faker) {
+            $this->setFakerField($fixture, $property, $annotation->faker);
+        }
+
         $property->setAccessible(false);
+    }
+
+    private function setFakerField($fixture, \ReflectionProperty $property, string $fieldType)
+    {
+        $property->setValue($fixture, $this->fakerFactory->$fieldType);
     }
 
     /**

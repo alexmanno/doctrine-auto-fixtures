@@ -6,6 +6,7 @@ use AlexManno\Engine\FixtureEngine;
 use AlexManno\Tests\Entities\AnotherEntity;
 use AlexManno\Tests\Entities\Entity;
 use AlexManno\Tests\Factories\SurnameFactory;
+use Faker\Generator;
 use PHPUnit\Framework\TestCase;
 
 class FixtureEngineTest extends TestCase
@@ -21,6 +22,31 @@ class FixtureEngineTest extends TestCase
 
         $this->assertInstanceOf(Entity::class, $fixture);
         $this->assertEquals('Alessandro', $fixture->getName());
+        $this->assertTrue(\in_array($fixture->getSurname(), SurnameFactory::SURNAMES));
+    }
+
+    /**
+     * @throws \AlexManno\Exceptions\AnnotationException
+     */
+    public function testGetEntityFaker()
+    {
+        $generator = new class() extends Generator {
+            public function __get($attribute)
+            {
+                if ('address' === $attribute) {
+                    return 'Address 42';
+                }
+
+                return parent::__get($attribute);
+            }
+        };
+
+        $engine = new FixtureEngine($generator);
+        /** @var Entity $fixture */
+        $fixture = $engine->get(Entity::class);
+
+        $this->assertInstanceOf(Entity::class, $fixture);
+        $this->assertEquals('Address 42', $fixture->getAddress());
         $this->assertTrue(\in_array($fixture->getSurname(), SurnameFactory::SURNAMES));
     }
 
