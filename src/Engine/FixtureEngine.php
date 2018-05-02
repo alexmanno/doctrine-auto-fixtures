@@ -28,7 +28,17 @@ class FixtureEngine
     {
         $this->fakerFactory = $fakerFactory ?? Factory::create();
 
-        AnnotationRegistry::registerLoader([require __DIR__ . '/../../vendor/autoload.php', 'loadClass']);
+        $root = null;
+        $directory = __DIR__;
+        do {
+            $directory = \dirname($directory);
+            $composer = $directory . '/composer.json';
+            if (\file_exists($composer)) {
+                $root = $directory;
+            }
+        } while (null === $root && $directory !== '/');
+
+        AnnotationRegistry::registerLoader([require $root . '/vendor/autoload.php', 'loadClass']);
     }
 
     /**
