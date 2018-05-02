@@ -55,7 +55,7 @@ class FixtureEngine
      * @param Fixture $annotation
      * @throws AnnotationException
      */
-    private function setProperty($fixture, \ReflectionProperty $property, $annotation)
+    private function setProperty($fixture, \ReflectionProperty $property, $annotation): void
     {
         $property->setAccessible(true);
 
