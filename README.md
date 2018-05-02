@@ -34,6 +34,16 @@ class Entity {
 }
 ```
 
+##### Faker on field
+```php
+class Entity {
+    /**
+     * @Fixture(faker="address")
+     */
+    private $entityField;
+}
+```
+
 ##### Link another entity on field
 ```php
 class Entity {
