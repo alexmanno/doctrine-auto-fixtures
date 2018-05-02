@@ -32,11 +32,10 @@ class FixtureEngine
         $directory = __DIR__;
         do {
             $directory = \dirname($directory);
-            $composer = $directory . '/composer.json';
-            if (\file_exists($composer)) {
+            if (\is_dir($directory . '/vendor/')) {
                 $root = $directory;
             }
-        } while (null === $root && $directory !== '/');
+        } while (null === $root && '/' !== $directory);
 
         AnnotationRegistry::registerLoader([require $root . '/vendor/autoload.php', 'loadClass']);
     }
@@ -111,7 +110,7 @@ class FixtureEngine
 
         $proxy = $factory->createProxy(
             $fqcn,
-            function (&$wrappedObject, $proxy, $method, $parameters, &$initializer) use ($fqcn) {
+            function (&$wrappedObject) use ($fqcn) {
                 $wrappedObject = new $fqcn();
                 $reader = new AnnotationReader();
                 $properties = (new \ReflectionClass($fqcn))->getProperties();
