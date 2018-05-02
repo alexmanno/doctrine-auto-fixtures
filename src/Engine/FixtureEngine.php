@@ -8,11 +8,21 @@ use AlexManno\Annotations\Fixture;
 use AlexManno\Exceptions\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use ProxyManager\Factory\LazyLoadingValueHolderFactory;
+use ProxyManager\Proxy\VirtualProxyInterface;
 
 class FixtureEngine
 {
     /** @var array */
     private $loadedClass = [];
+
+    /**
+     * FixtureEngine constructor.
+     */
+    public function __construct()
+    {
+        AnnotationRegistry::registerLoader([require __DIR__ . '/../../vendor/autoload.php', 'loadClass']);
+    }
 
     /**
      * @param string $fqcn
@@ -26,24 +36,11 @@ class FixtureEngine
         }
 
         try {
-            AnnotationRegistry::registerLoader([require __DIR__ . '/../../vendor/autoload.php', 'loadClass']);
-            $reader = new AnnotationReader();
-            $properties = (new \ReflectionClass($fqcn))->getProperties();
-            $fixture = new $fqcn();
+            $proxy = $this->getProxyForClass($fqcn);
 
-            foreach ($properties as $property) {
-                /** @var Fixture|null $annotation */
-                $annotation = $reader->getPropertyAnnotation($property, Fixture::class);
-                if (null === $annotation) {
-                    continue;
-                }
+            $this->loadedClass[$fqcn] = $proxy;
 
-                $this->setProperty($fixture, $property, $annotation);
-            }
-
-            $this->loadedClass[$fqcn] = $fixture;
-
-            return $fixture;
+            return $proxy;
         } catch (\Throwable $exception) {
             throw new AnnotationException($exception->getMessage(), $exception->getCode(), $exception);
         }
@@ -76,5 +73,35 @@ class FixtureEngine
         }
 
         $property->setAccessible(false);
+    }
+
+    /**
+     * @param string $fqcn
+     * @return VirtualProxyInterface
+     */
+    private function getProxyForClass(string $fqcn): VirtualProxyInterface
+    {
+        $factory = new LazyLoadingValueHolderFactory();
+
+        $proxy = $factory->createProxy(
+            $fqcn,
+            function (&$wrappedObject, $proxy, $method, $parameters, &$initializer) use ($fqcn) {
+                $wrappedObject = new $fqcn();
+                $reader = new AnnotationReader();
+                $properties = (new \ReflectionClass($fqcn))->getProperties();
+
+                foreach ($properties as $property) {
+                    /** @var Fixture|null $annotation */
+                    $annotation = $reader->getPropertyAnnotation($property, Fixture::class);
+                    if (null === $annotation) {
+                        continue;
+                    }
+
+                    $this->setProperty($wrappedObject, $property, $annotation);
+                }
+            }
+        );
+
+        return $proxy;
     }
 }

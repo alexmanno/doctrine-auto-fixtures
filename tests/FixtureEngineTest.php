@@ -53,4 +53,44 @@ class FixtureEngineTest extends TestCase
         $this->assertEquals('Alessandro', $fixture->getEntity()->getName());
         $this->assertTrue(\in_array($fixture->getEntity()->getSurname(), SurnameFactory::SURNAMES));
     }
+
+    /**
+     * @throws \AlexManno\Exceptions\AnnotationException
+     */
+    public function testGetEntityIt()
+    {
+        $engine = new FixtureEngine();
+        /** @var Entity $fixture */
+        $fixture = $engine->get(Entity::class);
+
+        $this->assertInstanceOf(Entity::class, $fixture);
+        $this->assertInstanceOf(AnotherEntity::class, $fixture->getEntity());
+
+        $this->assertEquals('Filippo', $fixture->getEntity()->getName());
+    }
+
+    /**
+     * @throws \AlexManno\Exceptions\AnnotationException
+     */
+    public function testGetAnotherEntityRecursive()
+    {
+        $engine = new FixtureEngine();
+        /** @var AnotherEntity $fixture */
+        $fixture = $engine->get(AnotherEntity::class);
+
+        $this->assertInstanceOf(AnotherEntity::class, $fixture);
+        $this->assertInstanceOf(Entity::class, $fixture->getEntity());
+
+        $this->assertEquals('Filippo', $fixture->getName());
+        $this->assertEquals(
+            'Alessandro',
+            $fixture->getEntity()->getEntity()->getEntity()->getEntity()->getEntity()->getName()
+        );
+        $this->assertTrue(
+            \in_array(
+                $fixture->getEntity()->getEntity()->getEntity()->getEntity()->getEntity()->getSurname(),
+                SurnameFactory::SURNAMES
+            )
+        );
+    }
 }

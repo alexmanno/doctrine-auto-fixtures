@@ -32,6 +32,13 @@ class Entity
     private $surname;
 
     /**
+     * @var AnotherEntity
+     *
+     * @Fixture(class="AlexManno\Tests\Entities\AnotherEntity")
+     */
+    private $entity;
+
+    /**
      * @return int
      */
     public function getId(): int
@@ -84,6 +91,25 @@ class Entity
     public function setSurname(string $surname): Entity
     {
         $this->surname = $surname;
+
+        return $this;
+    }
+
+    /**
+     * @return AnotherEntity
+     */
+    public function getEntity(): AnotherEntity
+    {
+        return $this->entity;
+    }
+
+    /**
+     * @param AnotherEntity $entity
+     * @return Entity
+     */
+    public function setEntity(AnotherEntity $entity): Entity
+    {
+        $this->entity = $entity;
 
         return $this;
     }
