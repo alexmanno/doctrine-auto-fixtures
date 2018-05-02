@@ -2,6 +2,7 @@
     "name": "alexmanno/doctrine-auto-fixtures",
     "description": "Automatic fixture for doctrine entities",
     "type": "library",
+    "license": "MIT",
     "authors": [
         {
             "name": "Alessandro Manno",
